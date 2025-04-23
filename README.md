@@ -28,8 +28,8 @@ node index.js
 
 ## Requisitos
 
-   -[Node.js](https://nodejs.org/es/download) Instalado.
-   -Los dispositivos deben estar conectados a la misma red (con o sin internet).
+   - [Node.js](https://nodejs.org/es/download) Instalado.
+   - Los dispositivos deben estar conectados a la misma red (con o sin internet).
 
 ## Caracteristicas
 
