@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Servidor local</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: sans-serif;
+      background: #383838;
+    }
+    
+    .h1-title {
+      font-size: 1.8rem;
+      text-align: center;
+      margin: 30px 15px;
+      color: #ffffff;
+    }
+    
+    .h2-subtitles {
+      color: #ffffff;
+      margin: 20px 15px;
+      font-size: 1.3rem;
+      margin-bottom: 5px;
+    }
+    
+    .portapapeles-container{
+      margin: 10px;
+    }
+    
+    .portapapeles-container > textarea{
+      width: 100%;
+      min-height: 100px;
+      border-radius: 10px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 0.7rem;
+    }
+    
+    .portapapeles-btns-container{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .portapapeles-btns-container > button{
+      all: unset;
+      flex: 1 1 80px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: #028dff;
+      border-radius: 10px;
+      padding: 8px 16px;
+      box-shadow: 5px 5px 5px #000000;
+      transition: 300ms ease all;
+    }
+    
+    .portapapeles-btns-container > button:hover{
+      transform: scale(0.9);
+    }
+    
+    .files-form {
+      margin: 10px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .files-form > div {
+      width: 100%;
+      height: 60px;
+      max-width: 350px;
+      position: relative;
+    }
+    
+    .files-form>div>input {
+      display: none;
+    }
+    
+    .file-label {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      border-radius: 15px;
+      border: 3px dashed #ffffff;
+      background: #ffffff4f;
+      transition: 300ms ease all;
+    }
+    
+    .file-label:hover {
+      transform: scale(0.95);
+      border: 3px dashed #b6b6b6;
+      background: #ffffff2a;
+    }
+    
+    .file-name {
+      color: #ffffff;
+      margin: 5px 0 10px 0;
+      font-size: 0.8rem;
+    }
+
+    .files-form > button{
+      all: unset;
+      text-align: center;
+      font-size: 0.8rem;
+      background: #028dff;
+      border-radius: 10px;
+      padding: 8px 16px;
+      box-shadow: 5px 5px 5px #000000;
+      transition: 300ms ease all;
+    }
+    .files-form > button:hover{
+      transform: scale(0.9);
+    }
+
+    .header-archivos{
+      margin: 0 10px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+    .header-archivos > p{
+      color: #24f535;
+    }
+    .fileList{
+      margin: 0 10px;
+      margin-bottom: 30px;
+    }
+    .fileList > li{
+      margin: 5px 0;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      color: #ffffff;
+
+    }
+    .fileList > li > a{
+      color: #ffffff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server</title>
+<body>
+  <h1 class="h1-title">Servidor Local de Archivos y Portapapeles</h1>
+  
+  <h2 class="h2-subtitles">Portapapeles</h2>
+  <div class="portapapeles-container">
+    <textarea id="clipboardText"></textarea><br>
+    <div class="portapapeles-btns-container">
+      <button onclick="saveClipboard()">Subir texto</button>
+      <button onclick="loadClipboard()">Cargar texto</button>
+      <button onclick="copiarTexto()">Copiar</button>
+      <button onclick="pegarPortapapeles()">Pegar</button>
+      <button onclick="limpiarPortapapeles()">Limpiar</button>
+    </div>
+  </div>
+  
+  <h2 class="h2-subtitles">Subir archivo</h2>
+  <form id="uploadForm" enctype="multipart/form-data" method="POST" action="/upload" class="files-form">
+    <div>
+      <input type="file" name="file" required id="file-input">
+      <label for="file-input" class="file-label">Elejir archivo</label>
+    </div>
+    <span id="file-name" class="file-name">Sin Archivo Seleccionado</span>
+    <button type="submit">Subir</button>
+  </form>
+  
+  <h2 class="h2-subtitles">Archivos disponibles</h2>
+  <div class="header-archivos">
+    <p>Archivo</p>
+    <p>Tipo</p>
+  </div>
+  <ul id="fileList" class="fileList"></ul>
+  
+  
+  <script>
+    document.getElementById('file-input').addEventListener('change', function () {
+      const file = this.files[0];
+      document.getElementById('file-name').textContent = file ? file.name : 'Sin archivo seleccionado';
+    });
+    
+    function pegarPortapapeles(){
+      try{
+        navigator.clipboard.readText().then((txt)=>{
+          document.getElementById('clipboardText').value = txt;
+        })
+      }catch(e){
+        alert("No se pudo pegar")
+      }
+    }
+    
+    function limpiarPortapapeles(){
+      document.getElementById('clipboardText').value = "";
+    }
+    
+    function copiarTexto() {
+      const textarea = document.getElementById('clipboardText');
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textarea.value)
+        .then(() => alert('Texto copiado'))
+        .catch(err => alert('Error: ' + err));
+      } else { //En caso de estar en http o que no haya funcionado el anterior metodo xd
+        textarea.select();
+        try {
+          const result = document.execCommand('copy');
+          alert(result ? 'Texto copiado (fallback)' : 'No se pudo copiar');
+        } catch (err) {
+          alert('Error al copiar');
+        }
+      }
+    }
+    
+    async function updateFileList() {
+      const res = await fetch('/files');
+      const files = await res.json();
+      const ul = document.getElementById('fileList');
+      
+      ul.innerHTML = '';
+      files.forEach(file => {
+        const li = document.createElement('li');
+        const tipo = file.split(".");
+        li.innerHTML = `
+          <a href="/download?f=${encodeURIComponent(file)}">${file}</a>
+          <p>${tipo[tipo.length-1].toUpperCase()}</p>
+        `;
+        ul.appendChild(li);
+      });
+    }
+    
+    async function saveClipboard() {
+      const text = document.getElementById('clipboardText').value;
+      await fetch('/clipboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `text=${encodeURIComponent(text)}`
+      });
+    }
+    
+    async function loadClipboard() {
+      const res = await fetch('/clipboard');
+      const text = await res.text();
+      document.getElementById('clipboardText').value = text;
+    }
+    
+    updateFileList();
+    loadClipboard();
+  </script>
+</body>
+
+</html>
